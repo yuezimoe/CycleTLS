@@ -1,6 +1,8 @@
 package cycletls
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"flag"
 	http "github.com/Danny-Dasilva/fhttp"
@@ -30,6 +32,8 @@ type Options struct {
 	OrderAsProvided    bool              `json:"orderAsProvided"` //TODO
 	InsecureSkipVerify bool              `json:"insecureSkipVerify"`
 	ForceHTTP1         bool              `json:"forceHTTP1"`
+	Base64Response     bool              `json:"base64Response"`
+	Base64Request      bool              `json:"base64Request"`
 }
 
 type cycleTLSRequest struct {
@@ -91,7 +95,19 @@ func processRequest(request cycleTLSRequest) (result fullRequest) {
 		log.Fatal(err)
 	}
 
-	req, err := http.NewRequest(strings.ToUpper(request.Options.Method), request.Options.URL, strings.NewReader(request.Options.Body))
+	var data io.Reader
+	if request.Options.Base64Request {
+		decodeBase64, err := base64.StdEncoding.DecodeString(request.Options.Body)
+		if err != nil {
+			log.Fatal(err)
+		} else {
+			data = bytes.NewReader(decodeBase64)
+		}
+	} else {
+		data = strings.NewReader(request.Options.Body)
+	}
+
+	req, err := http.NewRequest(strings.ToUpper(request.Options.Method), request.Options.URL, data)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -201,7 +217,9 @@ func dispatcher(res fullRequest) (response Response, err error) {
 		return response, err
 	}
 
-	Body := DecompressBody(bodyBytes, encoding, content)
+	//res.options.Options.URL
+
+	Body := DecompressBody(bodyBytes, encoding, content, res.options.Options.Base64Response)
 	headers := make(map[string]string)
 
 	for name, values := range resp.Header {

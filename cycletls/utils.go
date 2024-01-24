@@ -7,11 +7,11 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
-	"strconv"
-	"strings"
-	"io"
 	"github.com/andybalholm/brotli"
 	utls "github.com/refraction-networking/utls"
+	"io"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -38,7 +38,7 @@ func parseUserAgent(userAgent string) UserAgent {
 }
 
 // DecompressBody unzips compressed data
-func DecompressBody(Body []byte, encoding []string, content []string) (parsedBody string) {
+func DecompressBody(Body []byte, encoding []string, content []string, forceBase64Response bool) (parsedBody string) {
 	if len(encoding) > 0 {
 		if encoding[0] == "gzip" {
 			unz, err := gUnzipData(Body)
@@ -60,6 +60,9 @@ func DecompressBody(Body []byte, encoding []string, content []string) (parsedBod
 			return string(unz)
 		}
 	} else if len(content) > 0 {
+		if forceBase64Response {
+			return base64.StdEncoding.EncodeToString(Body)
+		}
 		decodingTypes := map[string]bool{
 			"image/svg+xml":   true,
 			"image/webp":      true,
