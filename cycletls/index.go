@@ -96,18 +96,16 @@ func processRequest(request cycleTLSRequest) (result fullRequest) {
 	}
 
 	var data io.Reader
-	if request.Options.Base64Request {
-		decodeBase64, err := base64.StdEncoding.DecodeString(request.Options.Body)
-		if err != nil {
-			log.Fatal(err)
-		} else {
-			data = bytes.NewReader(decodeBase64)
-		}
+
+	decodeBase64, err := base64.StdEncoding.DecodeString(request.Options.Body)
+	if err != nil {
+		log.Fatal(err)
 	} else {
-		data = strings.NewReader(request.Options.Body)
+		data = bytes.NewReader(decodeBase64)
 	}
 
 	req, err := http.NewRequest(strings.ToUpper(request.Options.Method), request.Options.URL, data)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -183,6 +181,7 @@ func processRequest(request cycleTLSRequest) (result fullRequest) {
 			req.Header.Set(k, v)
 		}
 	}
+
 	req.Header.Set("Host", u.Host)
 	req.Header.Set("user-agent", request.Options.UserAgent)
 	return fullRequest{req: req, client: client, options: request}
@@ -232,6 +231,7 @@ func dispatcher(res fullRequest) (response Response, err error) {
 		}
 	}
 	cookies := convertFHTTPCookiesToNetHTTPCookies(resp.Cookies())
+
 	return Response{
 		RequestID: res.options.RequestID,
 		Status:    resp.StatusCode,
