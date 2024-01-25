@@ -79,8 +79,9 @@ func DecompressBody(Body []byte, encoding []string, content []string, forceBase6
 			return base64.StdEncoding.EncodeToString(Body)
 		}
 	}
-	parsedBody = string(Body)
-	return parsedBody
+	//parsedBody = string(Body)
+	return base64.StdEncoding.EncodeToString(Body)
+	//return parsedBody
 
 }
 
