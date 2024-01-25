@@ -45,19 +45,22 @@ func DecompressBody(Body []byte, encoding []string, content []string, forceBase6
 			if err != nil {
 				return string(Body)
 			}
-			return string(unz)
+			//return string(unz)
+			return base64.StdEncoding.EncodeToString(unz)
 		} else if encoding[0] == "deflate" {
 			unz, err := enflateData(Body)
 			if err != nil {
 				return string(Body)
 			}
-			return string(unz)
+			//return string(unz)
+			return base64.StdEncoding.EncodeToString(unz)
 		} else if encoding[0] == "br" {
 			unz, err := unBrotliData(Body)
 			if err != nil {
 				return string(Body)
 			}
-			return string(unz)
+			return base64.StdEncoding.EncodeToString(unz)
+			//return string(unz)
 		}
 	} else if len(content) > 0 {
 		if forceBase64Response {
