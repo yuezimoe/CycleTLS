@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -217,9 +218,10 @@ func dispatcher(res fullRequest) (response Response, err error) {
 	}
 
 	//res.options.Options.URL
+	headers := make(map[string]string)
+	headers["rawContentLength"] = strconv.Itoa(len(bodyBytes))
 
 	Body := DecompressBody(bodyBytes, encoding, content, res.options.Options.Base64Response)
-	headers := make(map[string]string)
 
 	for name, values := range resp.Header {
 		if name == "Set-Cookie" {
@@ -231,7 +233,6 @@ func dispatcher(res fullRequest) (response Response, err error) {
 		}
 	}
 	cookies := convertFHTTPCookiesToNetHTTPCookies(resp.Cookies())
-
 	return Response{
 		RequestID: res.options.RequestID,
 		Status:    resp.StatusCode,
